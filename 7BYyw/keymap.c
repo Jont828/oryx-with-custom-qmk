@@ -5,6 +5,31 @@
 #define ZSA_SAFE_RANGE SAFE_RANGE
 #endif
 
+// ---- Custom QMK (not from Oryx): pick the Mac or PC layer from the host OS ----
+// QMK's OS detection fingerprints the host from its USB enumeration requests and
+// calls this once the guess settles (~250 ms after plug-in), then again only if
+// the guess changes. Switching works exactly like double-tapping into the layer,
+// so the existing double-tap keys still flip between Mac and PC by hand.
+#define PC_LAYER 0  // "Default"
+#define MAC_LAYER 2 // "Mac Keys"
+
+bool process_detected_host_os_user(os_variant_t detected_os) {
+    switch (detected_os) {
+        case OS_MACOS:
+        case OS_IOS: // iPhone/iPad want Mac keys too, and a Mac can briefly look like iOS mid-enumeration
+            layer_move(MAC_LAYER);
+            break;
+        case OS_WINDOWS:
+        case OS_LINUX:
+            layer_move(PC_LAYER);
+            break;
+        default: // OS_UNSURE: leave the layer alone
+            break;
+    }
+    return true;
+}
+// ---- End custom QMK ----
+
 enum custom_keycodes {
   RGB_SLD = ZSA_SAFE_RANGE,
   ST_MACRO_0,
